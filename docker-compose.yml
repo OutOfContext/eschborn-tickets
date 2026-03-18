@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-eschborn}
       POSTGRES_USER: ${POSTGRES_USER:-eschborn}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eschborn}
+    ports:
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
