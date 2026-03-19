@@ -18,10 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,15 +52,10 @@ public class ProjectServiceTest {
         Date now = new Date();
         
         project = new Project();
-        project.setId(PROJECT_ID);
         project.setProjectname("Test Project");
-        project.setCreator("testuser");
-        project.setCreatedAt(now);
 
         projectDto = new ProjectDto();
         projectDto.setProjectname("Test Project");
-        projectDto.setCreator("testuser");
-        projectDto.setCreatedAt(now);
     }
 
     @Test
@@ -73,15 +65,15 @@ public class ProjectServiceTest {
         List<ProjectDto> expectedDtos = Arrays.asList(projectDto);
         
         when(repository.findAll()).thenReturn(projects);
-        when(converter.convertAll(projects)).thenReturn(expectedDtos);
+        when(converter.convertAllToDto(projects)).thenReturn(expectedDtos);
 
         // When
-        List<ProjectDto> result = projectService.fetchAll();
+        Collection<ProjectDto> result = projectService.fetchAll();
 
         // Then
         assertThat(result).isEqualTo(expectedDtos);
         verify(repository).findAll();
-        verify(converter).convertAll(projects);
+        verify(converter).convertAllToDto(projects);
     }
 
     @Test
@@ -93,7 +85,7 @@ public class ProjectServiceTest {
         Page<ProjectDto> expectedPage = new PageImpl<>(Arrays.asList(projectDto), pageable, 1);
         
         when(repository.findAll(pageable)).thenReturn(projectPage);
-        when(converter.convertAll(projectPage)).thenReturn(expectedPage);
+        when(converter.convertAllToDto(projectPage)).thenReturn(expectedPage);
 
         // When
         Page<ProjectDto> result = projectService.fetchAll(pageable);
@@ -101,14 +93,14 @@ public class ProjectServiceTest {
         // Then
         assertThat(result).isEqualTo(expectedPage);
         verify(repository).findAll(pageable);
-        verify(converter).convertAll(projectPage);
+        verify(converter).convertAllToDto(projectPage);
     }
 
     @Test
     void fetchOne_shouldReturnProjectDto_whenProjectExists() {
         // Given
         when(repository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
-        when(converter.convert(project)).thenReturn(projectDto);
+        when(converter.convertToDto(project)).thenReturn(projectDto);
 
         // When
         ProjectDto result = projectService.fetchOne(PROJECT_ID);
@@ -116,7 +108,7 @@ public class ProjectServiceTest {
         // Then
         assertThat(result).isEqualTo(projectDto);
         verify(repository).findById(PROJECT_ID);
-        verify(converter).convert(project);
+        verify(converter).convertToDto(project);
     }
 
     @Test
@@ -130,26 +122,21 @@ public class ProjectServiceTest {
         // Then
         assertThat(result).isNull();
         verify(repository).findById(PROJECT_ID);
-        verify(converter, never()).convert(any());
+        verify(converter, never()).convertToDto(any());
     }
 
     @Test
     void create_shouldReturnCreatedProjectDto() {
         // Given
         Project createdProject = new Project();
-        createdProject.setId(PROJECT_ID);
         createdProject.setProjectname("New Project");
-        createdProject.setCreator("creator");
-        createdProject.setCreatedAt(new Date());
 
         ProjectDto createdDto = new ProjectDto();
         createdDto.setProjectname("New Project");
-        createdDto.setCreator("creator");
-        createdDto.setCreatedAt(new Date());
 
         when(entityCreater.create(projectDto)).thenReturn(project);
         when(repository.save(project)).thenReturn(createdProject);
-        when(converter.convert(createdProject)).thenReturn(createdDto);
+        when(converter.convertToDto(createdProject)).thenReturn(createdDto);
 
         // When
         ProjectDto result = projectService.create(projectDto);
@@ -158,7 +145,7 @@ public class ProjectServiceTest {
         assertThat(result).isEqualTo(createdDto);
         verify(entityCreater).create(projectDto);
         verify(repository).save(project);
-        verify(converter).convert(createdProject);
+        verify(converter).convertToDto(createdProject);
     }
 
     @Test
@@ -166,23 +153,18 @@ public class ProjectServiceTest {
         // Given
         ProjectDto updateRequest = new ProjectDto();
         updateRequest.setProjectname("Updated Project");
-        updateRequest.setCreator("updater");
 
         Project updatedProject = new Project();
-        updatedProject.setId(PROJECT_ID);
         updatedProject.setProjectname("Updated Project");
-        updatedProject.setCreator("updater");
         updatedProject.setCreatedAt(project.getCreatedAt());
 
         ProjectDto expectedDto = new ProjectDto();
         expectedDto.setProjectname("Updated Project");
-        expectedDto.setCreator("updater");
-        expectedDto.setCreatedAt(project.getCreatedAt());
 
         when(repository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(entityUpdater.update(project, updateRequest)).thenReturn(updatedProject);
         when(repository.save(updatedProject)).thenReturn(updatedProject);
-        when(converter.convert(updatedProject)).thenReturn(expectedDto);
+        when(converter.convertToDto(updatedProject)).thenReturn(expectedDto);
 
         // When
         ProjectDto result = projectService.update(PROJECT_ID, updateRequest);
@@ -192,7 +174,7 @@ public class ProjectServiceTest {
         verify(repository).findById(PROJECT_ID);
         verify(entityUpdater).update(project, updateRequest);
         verify(repository).save(updatedProject);
-        verify(converter).convert(updatedProject);
+        verify(converter).convertToDto(updatedProject);
     }
 
     @Test

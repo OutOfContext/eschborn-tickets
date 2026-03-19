@@ -15,9 +15,7 @@ public class ProjectUpdater implements EntityUpdater<Project, ProjectDto>{
             result.setProjectname(request.getProjectname());
         }
 
-        if (request.getCreator() != null) {
-            result.setCreator(request.getCreator());
-        }
+
 
         // createdAt wird nicht aktualisiert - es ist ein Timestamp
 

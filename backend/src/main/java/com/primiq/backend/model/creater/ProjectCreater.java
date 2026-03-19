@@ -16,7 +16,7 @@ public class ProjectCreater implements EntityCreater<Project, ProjectDto>{
     public Project create(ProjectDto projectDto) {
         Project project = new Project();
         project.setDescription(projectDto.getDescription());
-        project.setBoards(boardConverter.convertAll(projectDto.getBoards());
+        project.setBoards(boardConverter.convertAllToDao(projectDto.getBoards()));
         project.setProjectname(projectDto.getProjectname());
         return project;
     }

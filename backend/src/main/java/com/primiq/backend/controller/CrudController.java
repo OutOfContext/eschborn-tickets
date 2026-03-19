@@ -2,6 +2,8 @@ package com.primiq.backend.controller;
 
 import com.primiq.backend.model.dto.Message;
 import com.primiq.backend.service.EntityService;
+
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,7 @@ public interface CrudController<ID, DAO, DTO>{
   EntityService<ID, DAO, DTO> service();
 
   @GetMapping("/all")
-  default Message<List<DTO>> fetchAll() {
+  default Message<Collection<DTO>> fetchAll() {
     return Message.of(service().fetchAll());
   }
 

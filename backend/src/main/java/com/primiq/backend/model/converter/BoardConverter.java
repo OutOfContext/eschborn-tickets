@@ -13,17 +13,35 @@ import java.util.UUID;
 public class BoardConverter implements EntityConverter<UUID, Board, BoardDto>{
 
     @Override
-    public Collection<BoardDto> convertAll(Collection<Board> all) {
-        return List.of();
+    public Collection<BoardDto> convertAllToDto(Collection<Board> all) {
+        return all.stream().map(this::convertToDto).toList();
     }
 
     @Override
-    public Page<BoardDto> convertAll(Page<Board> all) {
-        return null;
+    public Collection<Board> convertAllToDao(Collection<BoardDto> all) {
+        return all.stream().map(this::convertToDao).toList();
     }
 
     @Override
-    public BoardDto convert(Board board) {
+    public Page<BoardDto> convertAllToDto(Page<Board> all) {
+        return all.map(this::convertToDto);
+    }
+
+    @Override
+    public Page<Board> convertAllToDao(Page<BoardDto> all) {
+
+       return all.map(this::convertToDao);
+    }
+
+    @Override
+    public BoardDto convertToDto(Board board) {
+        BoardDto boardDto= new BoardDto();
+        boardDto.setName(board.getName());
+        return boardDto;
+    }
+
+    @Override
+    public Board convertToDao(BoardDto dao) {
         return null;
     }
 }
