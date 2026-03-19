@@ -7,26 +7,6 @@ name: CI
       - 'frontend/**'
       - 'docker-compose.yml'
       - '.github/workflows/ci.yml'
-  pull_request:
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'docker-compose.yml'
-      - '.github/workflows/ci.yml'
-  workflow_dispatch:
-    inputs:
-      run_container_build:
-        description: 'Zusatzjob fuer Docker-Image-Builds ausfuehren'
-        required: false
-        default: false
-        type: boolean
-
-permissions:
-  contents: read
-
-env:
-  JAVA_VERSION: '21'
-  NODE_VERSION: '22'
 
 jobs:
 #  backend:
@@ -117,6 +97,7 @@ jobs:
 
       - name: Build and push Docker images
         run: |
+          ls -la
           docker build -t raffaelhu/eschborn-backend:latest -f backend/Dockerfile .
           docker build -t raffaelhu/eschborn-frontend:latest -f frontend/Dockerfile .
           docker push raffaelhu/eschborn-backend:latest
