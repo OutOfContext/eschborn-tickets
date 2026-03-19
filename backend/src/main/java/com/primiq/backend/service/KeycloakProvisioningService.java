@@ -42,12 +42,14 @@ public class KeycloakProvisioningService {
   }
 
   public void initializeRealmAndRoles() {
+    log.info("Ensuring Keycloak realm {} with base roles {}.", properties.realm(), properties.baseRoles());
     ensureRealmExists();
     RealmResource realmResource = realm();
     ensureBackendClientExists(realmResource);
     for (String roleName : properties.baseRoles()) {
       ensureRoleExists(realmResource, roleName);
     }
+    log.info("Keycloak realm {} is ready.", properties.realm());
   }
 
   public void initializeDevUsers() {
@@ -58,11 +60,16 @@ public class KeycloakProvisioningService {
       "project", "manager"
     );
 
+    log.info("Ensuring {} Keycloak dev users in realm {}.", properties.devUsers().size(), properties.realm());
+
     for (String username : properties.devUsers()) {
       String roleName = userRoleMap.getOrDefault(username, "employee");
+      log.debug("Ensuring dev user {} with role {}.", username, roleName);
       String userId = ensureUserExists(realmResource, username, username + "123");
       assignRealmRoles(realmResource, userId, Set.of(roleName));
     }
+
+    log.info("Finished Keycloak dev user initialization for realm {}.", properties.realm());
   }
 
   public Set<String> getUserRealmRolesByReferenceId(String referenceId) {
@@ -137,6 +144,7 @@ public class KeycloakProvisioningService {
   private void ensureRealmExists() {
     try {
       realm().toRepresentation();
+      log.debug("Keycloak realm {} already exists.", properties.realm());
       return;
     } catch (NotFoundException ex) {
       // Realm does not exist yet, create it below.
@@ -146,6 +154,7 @@ public class KeycloakProvisioningService {
     representation.setRealm(properties.realm());
     representation.setEnabled(true);
     keycloak.realms().create(representation);
+    log.info("Created Keycloak realm {}.", properties.realm());
   }
 
   private void ensureRoleExists(RealmResource realmResource, String roleName) {
@@ -156,12 +165,16 @@ public class KeycloakProvisioningService {
       RoleRepresentation roleRepresentation = new RoleRepresentation();
       roleRepresentation.setName(roleName);
       realmResource.roles().create(roleRepresentation);
+      log.info("Created Keycloak role {} in realm {}.", roleName, properties.realm());
+    } else {
+      log.debug("Keycloak role {} already exists in realm {}.", roleName, properties.realm());
     }
   }
 
   private void ensureBackendClientExists(RealmResource realmResource) {
     boolean exists = !realmResource.clients().findByClientId(properties.backendClientId()).isEmpty();
     if (exists) {
+      log.debug("Keycloak client {} already exists in realm {}.", properties.backendClientId(), properties.realm());
       return;
     }
 
@@ -173,11 +186,13 @@ public class KeycloakProvisioningService {
     clientRepresentation.setDirectAccessGrantsEnabled(true);
     clientRepresentation.setStandardFlowEnabled(true);
     realmResource.clients().create(clientRepresentation);
+    log.info("Created Keycloak client {} in realm {}.", properties.backendClientId(), properties.realm());
   }
 
   private String ensureUserExists(RealmResource realmResource, String username, String rawPassword) {
     List<UserRepresentation> existingUsers = realmResource.users().searchByUsername(username, true);
     if (!existingUsers.isEmpty()) {
+      log.debug("Keycloak user {} already exists in realm {}.", username, properties.realm());
       return existingUsers.get(0).getId();
     }
 
@@ -198,7 +213,9 @@ public class KeycloakProvisioningService {
       if (location == null || !location.contains("/")) {
         throw new IllegalStateException("Keycloak did not return a user location for " + username);
       }
-      return location.substring(location.lastIndexOf('/') + 1);
+      String createdUserId = location.substring(location.lastIndexOf('/') + 1);
+      log.info("Created Keycloak user {} in realm {}.", username, properties.realm());
+      return createdUserId;
     }
   }
 
@@ -219,6 +236,7 @@ public class KeycloakProvisioningService {
       .collect(Collectors.toSet());
 
     if (existingRoles.equals(roleNames)) {
+      log.debug("Keycloak user {} already has target roles {}.", userId, roleNames);
       return;
     }
 
@@ -238,6 +256,11 @@ public class KeycloakProvisioningService {
     if (!rolesToAdd.isEmpty()) {
       userResource.roles().realmLevel().add(rolesToAdd);
     }
+
+    log.info("Updated realm roles for Keycloak user {} (added: {}, removed: {}).",
+      userId,
+      rolesToAdd.stream().map(RoleRepresentation::getName).toList(),
+      rolesToRemove.stream().map(RoleRepresentation::getName).toList());
   }
 
   public record KeycloakUserSnapshot(

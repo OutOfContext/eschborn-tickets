@@ -34,13 +34,19 @@ public class InitService implements ApplicationListener<ApplicationReadyEvent> {
   @Override
   public void onApplicationEvent(ApplicationReadyEvent event) {
     if (!properties.bootstrapEnabled()) {
+      log.debug("Keycloak bootstrap is disabled by configuration.");
       return;
     }
+
+    log.info("Starting Keycloak bootstrap and initial user-role sync for realm {}.", properties.realm());
 
     try {
       keycloakProvisioningService.initializeRealmAndRoles();
       if (isDevProfileActive()) {
+        log.debug("Dev profile detected. Initializing Keycloak dev users.");
         keycloakProvisioningService.initializeDevUsers();
+      } else {
+        log.debug("Dev profile not active. Skipping Keycloak dev user initialization.");
       }
     } catch (RuntimeException ex) {
       log.warn("Keycloak bootstrap skipped due to error: {}", ex.getMessage());
@@ -51,6 +57,8 @@ public class InitService implements ApplicationListener<ApplicationReadyEvent> {
     } catch (RuntimeException ex) {
       log.warn("Initial Keycloak user-role sync skipped due to error: {}", ex.getMessage());
     }
+
+    log.info("Finished Keycloak bootstrap startup routine for realm {}.", properties.realm());
   }
 
   private boolean isDevProfileActive() {
