@@ -5,6 +5,7 @@ import com.primiq.backend.model.dto.BoardDto;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class BoardConverter implements EntityConverter<UUID, Board, BoardDto>{
 
     @Override
-    public List<BoardDto> convertAll(List<Board> all) {
+    public Collection<BoardDto> convertAll(Collection<Board> all) {
         return List.of();
     }
 
