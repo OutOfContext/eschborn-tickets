@@ -96,12 +96,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build and push Docker images
+        env:
+          DOCKER_BUILDKIT: 1
         run: |
           ls -la
-          docker build -t raffaelhu/eschborn-backend:latest -f backend/Dockerfile .
-          docker build -t raffaelhu/eschborn-frontend:latest -f frontend/Dockerfile .
+          docker build -t raffaelhu/eschborn-backend:latest -f backend/Dockerfile backend
+          docker build -t raffaelhu/eschborn-frontend:latest -f frontend/Dockerfile frontend
           docker push raffaelhu/eschborn-backend:latest
           docker push raffaelhu/eschborn-frontend:latest
-            env:
-              DOCKER_BUILDKIT: 1
+          
 
