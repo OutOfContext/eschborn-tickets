@@ -1,9 +1,7 @@
 package com.primiq.backend.model.dao;
 
-import com.primiq.backend.model.dto.BoardType;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import com.primiq.backend.model.dto.BoardTypeDto;
 
 
-public class KanbanContent extends BoardContent<BoardType>    {
+public class KanbanContent extends BoardContent<BoardTypeDto>    {
 }

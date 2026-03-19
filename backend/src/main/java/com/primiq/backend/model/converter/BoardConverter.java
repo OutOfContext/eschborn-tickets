@@ -1,7 +1,9 @@
 package com.primiq.backend.model.converter;
 
 import com.primiq.backend.model.dao.Board;
+import com.primiq.backend.model.dao.BoardTypeEnum;
 import com.primiq.backend.model.dto.BoardDto;
+import com.primiq.backend.model.dto.BoardTypeDto;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,26 @@ public class BoardConverter implements EntityConverter<UUID, Board, BoardDto>{
 
     @Override
     public BoardDto convert(Board board) {
-        return null;
+        return toDto(board);
+    }
+
+    public BoardDto toDto(Board board) {
+        BoardDto dto = new BoardDto();
+        dto.setName(board.getName());
+        if (board.getType() != null) {
+            dto.setType(BoardTypeDto.valueOf(board.getType().name()));
+        }
+        // weitere Felder
+        return dto;
+    }
+
+    public Board toEntity(BoardDto dto) {
+        Board board = new Board();
+        board.setName(dto.getName());
+        if (dto.getType() != null) {
+            board.setType(BoardTypeEnum.valueOf(dto.getType().name()));
+        }
+        // weitere Felder
+        return board;
     }
 }

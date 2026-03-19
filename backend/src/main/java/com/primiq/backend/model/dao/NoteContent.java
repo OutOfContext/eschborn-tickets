@@ -1,7 +1,7 @@
 package com.primiq.backend.model.dao;
 
-import com.primiq.backend.model.dto.BoardType;
+import com.primiq.backend.model.dto.BoardTypeDto;
 
-public class NoteContent extends BoardContent<BoardType> {
+public class NoteContent extends BoardContent<BoardTypeDto> {
 
 }

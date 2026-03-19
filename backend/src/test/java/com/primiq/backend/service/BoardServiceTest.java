@@ -3,7 +3,6 @@ package com.primiq.backend.service;
 import com.primiq.backend.model.converter.BoardConverter;
 import com.primiq.backend.model.creater.BoardCreater;
 import com.primiq.backend.model.dao.Board;
-import com.primiq.backend.model.dto.BoardDto;
 import com.primiq.backend.model.repository.BoardRepository;
 import com.primiq.backend.model.updater.BoardUpdater;
 import org.junit.jupiter.api.BeforeEach;

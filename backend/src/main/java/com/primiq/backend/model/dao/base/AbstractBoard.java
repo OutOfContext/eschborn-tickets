@@ -12,8 +12,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public class AbstractBoard<T extends AbstractBoardContent> extends BaseEntity {
-
-  private String type;
   private String name;
   private String description;
   private T boardContent;

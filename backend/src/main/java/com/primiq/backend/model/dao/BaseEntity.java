@@ -7,6 +7,7 @@ import java.util.UUID;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -22,6 +23,7 @@ public abstract class BaseEntity {
   private Timestamp createdAt;
   private Timestamp updatedAt;
   private String lastUser;
+  @Transient
   private AbstractUser owner;
 
 }

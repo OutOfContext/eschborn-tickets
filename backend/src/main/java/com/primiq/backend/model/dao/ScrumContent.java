@@ -1,6 +1,6 @@
 package com.primiq.backend.model.dao;
 
-import com.primiq.backend.model.dto.BoardType;
+import com.primiq.backend.model.dto.BoardTypeDto;
 
-public class ScrumContent extends BoardContent<BoardType> {
+public class ScrumContent extends BoardContent<BoardTypeDto> {
 }
