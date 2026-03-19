@@ -4,6 +4,7 @@ import com.primiq.backend.model.converter.EntityConverter;
 import com.primiq.backend.model.creater.EntityCreater;
 import com.primiq.backend.model.updater.EntityUpdater;
 import jakarta.transaction.Transactional;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -21,15 +22,12 @@ public interface EntityService<ID, DAO, DTO> {
     return repository().save(entity);
   }
 
-  default List<DTO> fetchAll() {
+  default Collection<DTO> fetchAll() {
     return converter().convertAll(repository().findAll());
   }
 
   default Page<DTO> fetchAll(Pageable pageable) {
     return converter().convertAll(repository().findAll(pageable));
-  }
-  default List<DTO> fetchAllWithoutTenant() {
-    return converter().convertAll(repository().findAll());
   }
 
   default DTO fetchOne(ID id) {

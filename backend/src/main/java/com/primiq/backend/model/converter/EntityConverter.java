@@ -1,13 +1,17 @@
 package com.primiq.backend.model.converter;
 
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface EntityConverter<ID, DAO, DTO> {
 
-  List<DTO> convertAll(List<DAO> all);
+  Collection<DTO> convertAllToDto(List<DAO> all);
+  Collection<DAO> convertAllToDao(List<DTO> all);
 
-  Page<DTO> convertAll(Page<DAO> all);
+  Page<DTO> convertAllToDto(Page<DAO> all);
+  Page<DAO> convertAllToDao(Page<DTO> all);
 
-  DTO convert(DAO dao);
+  DTO convertToDao(DAO dao);
+  DAO convertToDto(DTO dao);
 }

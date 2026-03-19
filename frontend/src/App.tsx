@@ -1,158 +1,78 @@
-import { useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
-import { fetchMediaMetadata, uploadMedia } from './api/media'
-import type { MediaMetadataResponse } from './types/media'
+import { useState } from 'react'
+import { login, logout } from './api/auth'
+import { JumpMenu } from './components/JumpMenu'
+import { LoginForm } from './components/LoginForm'
+import { MediaHandlerDemoPage } from './pages/MediaHandlerDemoPage'
+import type { CurrentUserResponse } from './types/auth'
 import './App.css'
 
+type AppView = 'login' | 'menu' | 'media-demo'
+
 function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [lookupId, setLookupId] = useState('')
-  const [activeMedia, setActiveMedia] = useState<MediaMetadataResponse | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false)
+  const [view, setView] = useState<AppView>('login')
+  const [currentUser, setCurrentUser] = useState<CurrentUserResponse | null>(null)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [copied, setCopied] = useState(false)
 
-  const prettyCreatedAt = useMemo(() => {
-    if (!activeMedia?.createdAt) {
-      return '-'
-    }
-
-    return new Date(activeMedia.createdAt).toLocaleString('de-DE')
-  }, [activeMedia])
-
-  const onUpload = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const onLogin = async (username: string, password: string) => {
     setErrorMessage('')
-    setCopied(false)
-
-    if (!selectedFile) {
-      setErrorMessage('Bitte zuerst eine Datei auswählen.')
-      return
-    }
-
-    setIsUploading(true)
+    setIsLoggingIn(true)
     try {
-      const metadata = await uploadMedia(selectedFile)
-      setActiveMedia(metadata)
-      setLookupId(metadata.id)
+      const response = await login(username, password)
+      setCurrentUser({
+        sessionId: response.sessionId,
+        username: response.username,
+        roles: response.roles,
+      })
+      setView('menu')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Upload fehlgeschlagen.')
+      setErrorMessage(error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen.')
     } finally {
-      setIsUploading(false)
+      setIsLoggingIn(false)
     }
   }
 
-  const onLookup = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const onLogout = async () => {
     setErrorMessage('')
-    setCopied(false)
-
-    if (!lookupId.trim()) {
-      setErrorMessage('Bitte eine Media-ID eingeben.')
-      return
-    }
-
-    setIsLoadingMetadata(true)
+    setIsLoggingOut(true)
     try {
-      const metadata = await fetchMediaMetadata(lookupId.trim())
-      setActiveMedia(metadata)
+      await logout()
+      setCurrentUser(null)
+      setView('login')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Metadaten konnten nicht geladen werden.')
+      setErrorMessage(error instanceof Error ? error.message : 'Abmeldung fehlgeschlagen.')
     } finally {
-      setIsLoadingMetadata(false)
+      setIsLoggingOut(false)
     }
   }
 
-  const copyEmbed = async () => {
-    if (!activeMedia?.embed) {
-      return
-    }
 
-    try {
-      await navigator.clipboard.writeText(activeMedia.embed)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1800)
-    } catch {
-      setErrorMessage('Embed-Code konnte nicht in die Zwischenablage kopiert werden.')
-    }
+  if (view === 'media-demo') {
+    return <MediaHandlerDemoPage onBack={() => setView('menu')} />
   }
 
-  const isImage = activeMedia?.contentType?.startsWith('image/')
+  if (view === 'menu' && currentUser) {
+    return (
+      <main className="shell">
+        <JumpMenu
+          user={currentUser}
+          onOpenMediaDemo={() => setView('media-demo')}
+          onLogout={onLogout}
+          isLoggingOut={isLoggingOut}
+          errorMessage={errorMessage}
+        />
+      </main>
+    )
+  }
 
   return (
-    <main className="app">
-      <header>
-        <h1>Media Handler Demo</h1>
-        <p>Upload testen, Metadaten prüfen und Embed-Link direkt kopieren.</p>
-      </header>
-
-      <section className="card">
-        <h2>Datei hochladen</h2>
-        <form className="form" onSubmit={onUpload}>
-          <input
-            type="file"
-            onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
-            aria-label="Datei auswählen"
-          />
-          <button type="submit" disabled={isUploading}>
-            {isUploading ? 'Lade hoch...' : 'Upload starten'}
-          </button>
-        </form>
-      </section>
-
-      <section className="card">
-        <h2>Metadaten per ID abrufen</h2>
-        <form className="form" onSubmit={onLookup}>
-          <input
-            type="text"
-            value={lookupId}
-            onChange={(event) => setLookupId(event.target.value)}
-            placeholder="z. B. 79ce9c1f-..."
-            aria-label="Media ID"
-          />
-          <button type="submit" disabled={isLoadingMetadata}>
-            {isLoadingMetadata ? 'Lade...' : 'Abrufen'}
-          </button>
-        </form>
-      </section>
-
-      {errorMessage && <p className="error">{errorMessage}</p>}
-
-      {activeMedia && (
-        <section className="card result">
-          <h2>Aktive Media</h2>
-          <dl>
-            <div><dt>ID</dt><dd>{activeMedia.id}</dd></div>
-            <div><dt>Dateiname</dt><dd>{activeMedia.originalFilename}</dd></div>
-            <div><dt>Content-Type</dt><dd>{activeMedia.contentType}</dd></div>
-            <div><dt>Größe</dt><dd>{activeMedia.sizeBytes} Bytes</dd></div>
-            <div><dt>Erstellt</dt><dd>{prettyCreatedAt}</dd></div>
-            <div>
-              <dt>Content</dt>
-              <dd>
-                <a href={activeMedia.contentUrl} target="_blank" rel="noreferrer">
-                  {activeMedia.contentUrl}
-                </a>
-              </dd>
-            </div>
-          </dl>
-
-          <div className="embedBox">
-            <label htmlFor="embedText">Embed-Code</label>
-            <textarea id="embedText" readOnly value={activeMedia.embed} />
-            <button type="button" onClick={copyEmbed}>Embed kopieren</button>
-            {copied && <span className="copied">Kopiert.</span>}
-          </div>
-
-          {isImage && (
-            <div className="preview">
-              <h3>Bildvorschau</h3>
-              <img src={activeMedia.contentUrl} alt={activeMedia.originalFilename} />
-            </div>
-          )}
-        </section>
-      )}
+    <main className="shell">
+      <LoginForm
+        onLogin={onLogin}
+        isSubmitting={isLoggingIn}
+        errorMessage={errorMessage}
+      />
     </main>
   )
 }
