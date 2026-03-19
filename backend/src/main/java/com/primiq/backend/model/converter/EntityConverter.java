@@ -12,6 +12,6 @@ public interface EntityConverter<ID, DAO, DTO> {
   Page<DTO> convertAllToDto(Page<DAO> all);
   Page<DAO> convertAllToDao(Page<DTO> all);
 
-  DTO convertToDao(DAO dao);
-  DAO convertToDto(DTO dao);
+  DAO convertToDao(DTO dao);
+  DTO convertToDto(DAO dao);
 }

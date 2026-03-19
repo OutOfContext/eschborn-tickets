@@ -12,7 +12,6 @@ import java.util.UUID;
 @Component
 public class BoardConverter implements EntityConverter<UUID, Board, BoardDto>{
 
-
     @Override
     public Collection<BoardDto> convertAllToDto(List<Board> all) {
         return List.of();
@@ -34,12 +33,12 @@ public class BoardConverter implements EntityConverter<UUID, Board, BoardDto>{
     }
 
     @Override
-    public BoardDto convertToDao(Board board) {
+    public Board convertToDao(BoardDto dao) {
         return null;
     }
 
     @Override
-    public Board convertToDto(BoardDto dao) {
+    public BoardDto convertToDto(Board board) {
         return null;
     }
 }

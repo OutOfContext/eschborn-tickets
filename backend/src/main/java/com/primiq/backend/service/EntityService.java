@@ -23,23 +23,23 @@ public interface EntityService<ID, DAO, DTO> {
   }
 
   default Collection<DTO> fetchAll() {
-    return converter().convertAll(repository().findAll());
+    return converter().convertAllToDto(repository().findAll());
   }
 
   default Page<DTO> fetchAll(Pageable pageable) {
-    return converter().convertAll(repository().findAll(pageable));
+    return converter().convertAllToDto(repository().findAll(pageable));
   }
 
   default DTO fetchOne(ID id) {
     Optional<DAO> maybeResult = repository().findById(id);
-    return maybeResult.map(converter()::convert).orElse(null);
+    return maybeResult.map(converter()::convertToDto).orElse(null);
   }
 
   @Transactional
   default DTO create(DTO request) {
     DAO entity = entityCreater().create(request);
     DAO saved = persistEntity(entity);
-    return converter().convert(saved);
+    return converter().convertToDto(saved);
   }
 
   @Transactional
@@ -49,7 +49,7 @@ public interface EntityService<ID, DAO, DTO> {
       DAO updatedEntity = entityUpdater().update(result, request);
       return persistEntity(updatedEntity);
     }).orElseThrow(() -> new RuntimeException(String.format("Object with id [%s] not found", id)));
-    return converter().convert(savedResult);
+    return converter().convertToDto(savedResult);
   }
 
   default String delete(ID id){
