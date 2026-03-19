@@ -1,11 +1,15 @@
 package com.primiq.backend.model.dao.base;
 
 import com.primiq.backend.model.dao.BaseEntity;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+
+@MappedSuperclass
 @EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class AbstractBudget extends BaseEntity {
@@ -16,4 +20,6 @@ public abstract class AbstractBudget extends BaseEntity {
   private Timestamp releaseDate;
   private Timestamp endDate;
   private boolean isActive;
+
+
 }

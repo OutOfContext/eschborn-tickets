@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-public interface CrudController<ID, DAO, DTO>{
+public interface
+CrudController<ID, DAO, DTO>{
 
   EntityService<ID, DAO, DTO> service();
 
